@@ -158,13 +158,13 @@ func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
 
 	c := make(chan interface{})
 
-	headerMap, err := dec.mapHeaderToField()
+	matched, err := dec.mapHeaderToField()
 	if err != nil {
 		glog.Error("Failed to map header to field")
 		return nil, err
 	}
 
-	glog.Infof("%v", headerMap)
+	glog.Infof("%v", matched)
 
 	// Setup new Struct based on Type
 	v := reflect.New(dec.typ).Elem()
@@ -173,7 +173,7 @@ func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
 		defer close(c)
 		for dec.scanner.Scan() {
 			col := strings.Split(dec.scanner.Text(), dec.Delimiter)
-			for idx, fldinfo := range headerMap {
+			for idx, fldinfo := range matched {
 				f := v.FieldByName(fldinfo.fldName)
 				if err = dec.setValue(&f, col[idx]); err != nil {
 					glog.Errorf("line:%d column:%s", dec.counter, fldinfo.fldName)
