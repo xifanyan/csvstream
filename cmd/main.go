@@ -20,12 +20,13 @@ type timeseries struct {
 
 func main() {
 
-	f, _ := os.Open("testdata/withheader.csv")
+	f, _ := os.Open("testdata/withoutheader.csv")
 	dec, _ := csvstream.NewDecoder(f, &timeseries{})
+	dec.HasHeader = false
 
 	c, _ := dec.Unmarshal()
 
 	for row := range c {
-		fmt.Printf("%v\n", row.(timeseries))
+		fmt.Printf("%+v\n", row.(timeseries))
 	}
 }

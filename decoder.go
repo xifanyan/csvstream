@@ -1,3 +1,4 @@
+// Better CSV Processor
 package csvstream
 
 import (
@@ -106,18 +107,27 @@ func (dec *Decoder) mapHeaderToField() (map[int]fieldInfo, error) {
 
 	m := make(map[int]fieldInfo)
 
-	if err := dec.setHeader(); err != nil {
-		return nil, err
-	}
-
 	if err := dec.setFieldInfos(); err != nil {
 		return nil, err
 	}
 
-	for i := 0; i < len(dec.header); i++ {
+	if dec.HasHeader {
+		if err := dec.setHeader(); err != nil {
+			return nil, err
+		}
+		for i := 0; i < len(dec.header); i++ {
+			for j := 0; j < len(dec.fieldInfos); j++ {
+				if dec.header[i] == dec.fieldInfos[j].tagName {
+					m[i] = dec.fieldInfos[j]
+				}
+			}
+		}
+	} else {
+		i := 0
 		for j := 0; j < len(dec.fieldInfos); j++ {
-			if dec.header[i] == dec.fieldInfos[j].tagName {
+			if len(dec.fieldInfos[j].tagName) > 0 {
 				m[i] = dec.fieldInfos[j]
+				i++
 			}
 		}
 	}
@@ -127,28 +137,36 @@ func (dec *Decoder) mapHeaderToField() (map[int]fieldInfo, error) {
 
 func (dec *Decoder) setValue(f *reflect.Value, s string) error {
 
+	var err error
+
 	if f.IsValid() && f.CanSet() {
 		switch f.Kind() {
 		case reflect.Float32, reflect.Float64:
 			if floatv, err := strconv.ParseFloat(s, 64); err == nil {
 				f.SetFloat(floatv)
+			} else {
+				err = errors.New("Failed to convert to float")
 			}
 		case reflect.String:
 			f.SetString(s)
 		case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
 			if intv, err := strconv.ParseInt(s, 10, 64); err == nil {
 				f.SetInt(intv)
+			} else {
+				err = errors.New("Failed to convert to int")
 			}
 		case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			if uintv, err := strconv.ParseUint(s, 10, 64); err == nil {
 				f.SetUint(uintv)
+			} else {
+				err = errors.New("Failed to convert to uint")
 			}
 		default:
-			return errors.New("Not supported data type")
+			err = errors.New("Not supported data type")
 		}
 	}
 
-	return nil
+	return err
 }
 
 func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
