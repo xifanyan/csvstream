@@ -102,6 +102,8 @@ func (dec *Decoder) setFieldInfos() error {
 	return err
 }
 
+// If csv has header, match header to field with same csv tagger name
+// Otherwise, use fields with csv tagger name as csv header
 func (dec *Decoder) mapHeaderToField() (map[int]fieldInfo, error) {
 	var err error
 

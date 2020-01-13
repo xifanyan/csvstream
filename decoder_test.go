@@ -7,18 +7,17 @@ import (
 )
 
 type timeseries struct {
-	TimeStamp string  `gorm:"primary_key" csv:"timestamp"`
-	Function  uint8   `gorm:"primary_key;auto_increment:false"`
-	Symbol    string  `gorm:"primary_key"`
-	Open      float64 `csv:"open"`
-	High      float64 `csv:"high"`
-	// Low              float64 `csv:"low"`
+	TimeStamp        string  `gorm:"primary_key" csv:"timestamp"`
+	Function         uint8   `gorm:"primary_key;auto_increment:false"`
+	Symbol           string  `gorm:"primary_key"`
+	Open             float64 `csv:"open"`
+	High             float64 `csv:"high"`
+	Low              float64 `csv:"low"`
 	Close            float64 `csv:"close"`
 	AdjustedClose    float64 `csv:"adjusted_close"`
 	Volume           int     `csv:"volume"`
 	Dividend         float64 `csv:"dividend_amount"`
 	SplitCoefficient float64 `csv:"split_coefficient"`
-	Dummy            string  `csv:"dummy"`
 }
 
 func TestGetCSVHeader(t *testing.T) {
