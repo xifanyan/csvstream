@@ -3,7 +3,6 @@ package csvstream
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"reflect"
 	"strconv"
@@ -134,19 +133,16 @@ func (dec *Decoder) setValue(f *reflect.Value, s string) error {
 			if floatv, err := strconv.ParseFloat(s, 64); err == nil {
 				f.SetFloat(floatv)
 			}
-			return errors.New("Failed to convert to float")
 		case reflect.String:
 			f.SetString(s)
 		case reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
 			if intv, err := strconv.ParseInt(s, 10, 64); err == nil {
 				f.SetInt(intv)
 			}
-			return errors.New("Failed to convert to int")
 		case reflect.Uint, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			if uintv, err := strconv.ParseUint(s, 10, 64); err == nil {
 				f.SetUint(uintv)
 			}
-			return errors.New("Failed to convert to uint")
 		default:
 			return errors.New("Not supported data type")
 		}
@@ -166,16 +162,14 @@ func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
 		return nil, err
 	}
 
-	glog.Infof("%v", matched)
-
 	// Setup new Struct based on Type
 	v := reflect.New(dec.typ).Elem()
 
 	go func() {
 		defer close(c)
 		for dec.scanner.Scan() {
+			dec.counter++
 			col := strings.Split(dec.scanner.Text(), dec.Delimiter)
-			fmt.Printf("%d: %v\n", len(col), col)
 			for idx, fldinfo := range matched {
 				f := v.FieldByName(fldinfo.fldName)
 				if err = dec.setValue(&f, col[idx]); err != nil {
