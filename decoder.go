@@ -3,6 +3,7 @@ package csvstream
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"reflect"
 	"strconv"
@@ -150,6 +151,7 @@ func (dec *Decoder) setValue(f *reflect.Value, s string) error {
 			return errors.New("Not supported data type")
 		}
 	}
+
 	return nil
 }
 
@@ -173,6 +175,7 @@ func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
 		defer close(c)
 		for dec.scanner.Scan() {
 			col := strings.Split(dec.scanner.Text(), dec.Delimiter)
+			fmt.Printf("%d: %v\n", len(col), col)
 			for idx, fldinfo := range matched {
 				f := v.FieldByName(fldinfo.fldName)
 				if err = dec.setValue(&f, col[idx]); err != nil {
