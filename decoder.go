@@ -1,4 +1,4 @@
-// Better CSV Processor
+// Package csvstream : Stream CSV Processor
 package csvstream
 
 import (
@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	// TAG csv tagger
 	TAG = "csv"
 )
 
@@ -22,6 +23,7 @@ type fieldInfo struct {
 	tagName string
 }
 
+// Decoder : CSV decoder
 type Decoder struct {
 	r          io.Reader
 	scanner    *bufio.Scanner
@@ -35,6 +37,7 @@ type Decoder struct {
 	counter    int
 }
 
+// NewDecoder : Constructor of csv decoder
 func NewDecoder(r io.Reader, v interface{}) (*Decoder, error) {
 
 	var err error
@@ -63,11 +66,14 @@ func NewDecoder(r io.Reader, v interface{}) (*Decoder, error) {
 
 }
 
+// setHeader : method to get CSV header information and set Decoder.header field.
 func (dec *Decoder) setHeader() error {
 	var err error
 
+	// check whether csv file has been read before.
 	if dec.counter == 0 {
 		if dec.HasHeader {
+			// scan first line to be used as header
 			_ = dec.scanner.Scan()
 
 			dec.counter++
@@ -84,6 +90,7 @@ func (dec *Decoder) setHeader() error {
 	return err
 }
 
+// setFieldInfos : method to parse Struct fields via reflect.
 func (dec *Decoder) setFieldInfos() error {
 	var err error
 
@@ -102,6 +109,7 @@ func (dec *Decoder) setFieldInfos() error {
 	return err
 }
 
+// mapHeaderToField : method to map header to field
 // If csv has header, match header to field with same csv tagger name
 // Otherwise, use fields with csv tagger name as csv header
 func (dec *Decoder) mapHeaderToField() (map[int]fieldInfo, error) {
@@ -137,6 +145,7 @@ func (dec *Decoder) mapHeaderToField() (map[int]fieldInfo, error) {
 	return m, err
 }
 
+// setValue : convert value from string and set field depending on its type.
 func (dec *Decoder) setValue(f *reflect.Value, s string) error {
 
 	var err error
@@ -171,6 +180,7 @@ func (dec *Decoder) setValue(f *reflect.Value, s string) error {
 	return err
 }
 
+// Unmarshal : unmarshal row to struct
 func (dec *Decoder) Unmarshal() (<-chan interface{}, error) {
 	var err error
 
